@@ -1,0 +1,54 @@
+pipeline:
+  name: build-react-app
+  identifier: build_react_app
+  projectIdentifier: hello_harness_ci_pipeline
+  orgIdentifier: default
+  stages:
+    - stage:
+        name: build
+        identifier: build
+        type: CI
+        spec:
+          cloneCodebase: true
+          infrastructure:
+            type: Hosted
+          execution:
+            steps:
+              - step:
+                  type: Cache
+                  name: Cache npm Dependencies
+                  identifier: cache_npm
+                  spec:
+                    type: Npm
+                    path: ~/.npm
+                    key: npm-cache-{{ .pipeline.executionId }}
+              - step:
+                  type: Run
+                  name: Install Dependencies and Build
+                  identifier: install_and_build
+                  spec:
+                    shell: Sh
+                    command: |
+                      npm install
+                      npm run build
+                    image: node:18
+              - step:
+                  type: Run
+                  name: Run Tests
+                  identifier: run_tests
+                  spec:
+                    shell: Sh
+                    command: npm test
+                    image: node:18
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: MarkAsFailure
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.GitHubjnayak1482  # Replace with your actual GitHub connector ID
+        repoName: hello-harness             # Replace with your actual repo name if different
+        build: main         
