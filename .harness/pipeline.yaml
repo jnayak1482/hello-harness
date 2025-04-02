@@ -3,6 +3,14 @@ pipeline:
   identifier: build_react_app
   projectIdentifier: hello_harness_ci_pipeline
   orgIdentifier: default
+  variables:
+    - name: RUNNER_HOST
+      type: String
+      value: "192.168.1.44"  # ✅ Ensure correct runner IP
+    - name: RUNNER_PORT
+      type: String  # ✅ Changed from Number to String for stability
+      value: "3000"
+
   stages:
     - stage:
         name: build
@@ -14,24 +22,29 @@ pipeline:
             type: VM
             spec:
               poolName: linux-amd64
-  execution:
-    steps:
-      - step:
-          type: Run
-          name: Install Dependencies and Build
-          identifier: install_and_build
-        spec:
-          shell: Sh
-          command: |
-            npm install
-            npm run build
-          image: node:18
+              delegateSelectors:  # ✅ Moved inside `infrastructure.spec`
+                - linux-amd64
+
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Install Dependencies and Build
+                  identifier: install_and_build
+                  spec:
+                    shell: Sh
+                    command: |
+                      npm install
+                      npm run build
+                    image: node:18
+
         failureStrategies:
           - onFailure:
               errors:
                 - AllErrors
               action:
                 type: MarkAsFailure
+
   properties:
     ci:
       codebase:
@@ -40,13 +53,4 @@ pipeline:
         build:
           type: branch
           spec:
-            branch: main # Changed for stability
-  delegateSelectors:
-    - linux-amd64 # Ensures correct delegate selection
-  variables:
-    - name: RUNNER_HOST
-      type: String
-      value: "192.168.1.44" # Change to actual runner IP
-    - name: RUNNER_PORT
-      type: Number
-      value: 3000
+            branch: main  # ✅ Ensures stability
