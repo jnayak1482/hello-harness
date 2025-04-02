@@ -13,9 +13,10 @@ pipeline:
           infrastructure:
             type: VM
             spec:
-             selector:
-              tags:
-               - linux-amd64
+              pool: linux-amd64  # Corrected from selector.tags
+              platform:
+                os: Linux
+                arch: Amd64  # Fixed missing "platform" property
           execution:
             steps:
               - step:
@@ -58,8 +59,13 @@ pipeline:
         build:
           type: branch
           spec:
-            branch: <+trigger.branch>
-       # build:
-        #  type: branch  # Changed from "main"
-        #  spec:
-        #    branch: main
+            branch: main  # Changed for stability
+  delegateSelectors:
+    - linux-amd64  # Ensures correct delegate selection
+  variables:
+    - name: RUNNER_HOST
+      type: String
+      value: "192.168.1.44"  # Change to actual runner IP
+    - name: RUNNER_PORT
+      type: Number
+      value: 3000  # Change to your actual port
