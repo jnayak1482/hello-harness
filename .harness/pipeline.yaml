@@ -11,7 +11,11 @@ pipeline:
         spec:
           cloneCodebase: true
           infrastructure:
-            type: Hosted
+            type: VM
+            spec:
+             selector:
+              tags:
+               - linux-amd64
           execution:
             steps:
               - step:
@@ -20,8 +24,8 @@ pipeline:
                   identifier: cache_npm
                   spec:
                     type: Npm
-                    path: ~/.npm
-                    key: npm-cache-{{ .pipeline.executionId }}
+                    path: "~/.npm"
+                    key: "npm-cache-{{ .pipeline.executionId }}"
               - step:
                   type: Run
                   name: Install Dependencies and Build
@@ -49,6 +53,13 @@ pipeline:
   properties:
     ci:
       codebase:
-        connectorRef: account.GitHubjnayak1482  # Replace with your actual GitHub connector ID
-        repoName: hello-harness             # Replace with your actual repo name if different
-        build: main         
+        connectorRef: account.GitHubjnayak1482
+        repoName: hello-harness
+        build:
+          type: branch
+          spec:
+            branch: <+trigger.branch>
+       # build:
+        #  type: branch  # Changed from "main"
+        #  spec:
+        #    branch: main
